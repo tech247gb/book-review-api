@@ -109,6 +109,30 @@ export const deleteReviewById = async (req: Request, res: Response) => {
     }
 }
 /**
+ * View a book review of a user.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @returns A JSON response indicating success or failure
+ */
+export const getBookReviewByUserId = async (req: Request, res: Response) => {
+    try {
+        const limit = parseInt(req.query.limit as string || '5')
+        const page = parseInt(req.query.page as string || '1')
+        const searchKey = (req.query.searchKey as string || '').trim()
+
+        const offset: number = (page - 1) * limit
+        const { _id: userId } = parseToken(req.headers)
+
+        const searchQuery: SearchQuery = makeSearchQuery(searchKey, userId)
+        const { total, reviews } = await getReviews(searchQuery, limit, offset)
+        return res.status(200).send({ total, reviews })
+    } catch (err: any) {
+        console.log("Error occur when fetching reviews by user :", err.message)
+        return res.json({ err: err.message })
+    }
+}
+/**
  * View a book review by book id..
  *
  * @param req - Express request object
